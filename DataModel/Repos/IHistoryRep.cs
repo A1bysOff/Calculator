@@ -9,7 +9,7 @@ namespace DataModel.Repos
 {
     public interface IHistoryRep
     {
-        IQueryable<History> GetHistories(bool IsAdmin = false);
+        IQueryable<History> GetHistories(bool isAdmin = false);
         Task DeleteAsync(Guid id);
         Task AddAsync(History history);
 

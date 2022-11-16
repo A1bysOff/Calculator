@@ -25,7 +25,7 @@ namespace CalculationsModel
             Operation = operation;
         }
 
-        protected virtual void Calculate()
+        public virtual void Calculate()
         {
             CheckOperator(Operation);
             CheckOperand(FirstOperand);
@@ -33,35 +33,39 @@ namespace CalculationsModel
 
             try
             {
-                switch (Operation)
+                checked
                 {
-                    case "+":
-                        Result = (Convert.ToDouble(FirstOperand) + Convert.ToDouble(SecondOperand)).ToString();
-                        break;
-                    case "-":
-                        Result = (Convert.ToDouble(FirstOperand) - Convert.ToDouble(SecondOperand)).ToString();
-                        break;
-                    case "*":
-                        Result = (Convert.ToDouble(FirstOperand) * Convert.ToDouble(SecondOperand)).ToString();
-                        break;
-                    case "/":
-                        if (SecondOperand == "0")
-                        {
-                            Result = "Zero devision error";
-                            throw new ArgumentException("Zero devision error");
-                        }
-                        Result = (Convert.ToDouble(FirstOperand) / Convert.ToDouble(SecondOperand)).ToString();
-                        break;
-                    case "√":
-                        var firstOperand = Convert.ToDouble(FirstOperand);
-                        if (firstOperand < 0)
-                        {
-                            Result = "Operand is negative";
-                            throw new ArgumentException("Operand is negative");
-                        }
-                        Result = Math.Sqrt(firstOperand).ToString();
-                        break;
+                    switch (Operation)
+                    {
+                        case "+":
+                            Result = (Convert.ToDouble(FirstOperand) + Convert.ToDouble(SecondOperand)).ToString();
+                            break;
+                        case "-":
+                            Result = (Convert.ToDouble(FirstOperand) - Convert.ToDouble(SecondOperand)).ToString();
+                            break;
+                        case "*":
+                            Result = (Convert.ToDouble(FirstOperand) * Convert.ToDouble(SecondOperand)).ToString();
+                            break;
+                        case "/":
+                            if (SecondOperand == "0")
+                            {
+                                Result = "Zero devision error";
+                                throw new DivideByZeroException("Zero devision error");
+                            }
+                            Result = (Convert.ToDouble(FirstOperand) / Convert.ToDouble(SecondOperand)).ToString();
+                            break;
+                        case "√":
+                            var firstOperand = Convert.ToDouble(FirstOperand);
+                            if (firstOperand < 0)
+                            {
+                                Result = "Operand is negative";
+                                throw new ArgumentException("Operand is negative");
+                            }
+                            Result = Math.Sqrt(firstOperand).ToString();
+                            break;
+                    }
                 }
+                
             }
             catch
             {

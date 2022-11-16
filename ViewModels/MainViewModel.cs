@@ -14,13 +14,19 @@ namespace ViewModels
         public string Display
         {
             get => display;
+
             set
             {
+                if (value.Length>18)
+                {
+                    value = value.Remove(18);
+                }
                 display = value;
                 OnPropertyChanged("Display");
                 BackSpace.RaiseCanExecuteChanged();
                 DotPress.RaiseCanExecuteChanged();
             }
+
         }
 
         void SetInfo()
@@ -49,11 +55,13 @@ namespace ViewModels
             {
                 info = value;
                 OnPropertyChanged("Info");
+                EqualPress.RaiseCanExecuteChanged();
+
                 
             }
         }
         string lastOperation = "";
-        string LastOperatin
+        string LastOperation
         {
             get => lastOperation;
             set
@@ -69,23 +77,97 @@ namespace ViewModels
         public  Command BackSpace { get; }
         public  Command PlusMinus { get; }
         public  Command DotPress { get; }
+        public  Command EqualPress { get; }
+        public  Command CPress { get; }
 
-        public MainViewModel()
+
+        public MainViewModel(IErrorHundler errorHundler)
         {
             DigitPress = new Command<string>(digitPress);
-            OperationPress = new Command<string>(operationPress, _=> string.IsNullOrEmpty(lastOperation));
+            OperationPress = new Command<string>(operationPress);
             BackSpace = new Command(backSpace, () => Display != "0");
             PlusMinus = new Command(() =>
             Display = Display[0] == '-' ? Display.Remove(0, 1) : '-' + Display) ;
             DotPress = new Command(()=> Display += Dot, ()=> !Display.Contains(Dot));
+            EqualPress = new Command(equalPress, () => lastOperation.Length > 0,errorHundler);
+            CPress = new Command(cPress);
+        }
+
+        private void cPress()
+        {
+            model = new Calculations();
+            lastOperation = "";
+            Info = "";
+            Display = "0";
+        }
+
+        private void equalPress()
+        {
+            if(!model.IsAtomar)
+            {
+                model.SecondOperand = display;
+                Info = model.FirstOperand + " " +model.Operation+ " "+ display;
+            }
+            
+            model.Calculate();
+            Info = $"{Info} = {model.Result}";
+            Display = model.Result;
+            lastOperation = "";
+
         }
 
         private void operationPress(string obj)
         {
+            if(lastOperation==obj)
+            {
+                return;
+            }
+            if(Info.Contains("="))
+            {
+                Info = display;
+                
+            }
+            var old = lastOperation;
+            bool oldIsAtomar = model.IsAtomar;
             lastOperation = obj;
+            
             model = new Calculations(display, "0", obj);
-            SetInfo();
-           // if (model.IsAtomar)
+
+            if (model.IsAtomar)
+            {
+                if(oldIsAtomar)
+                {
+                    Info = Info.Replace(old, model.Operation);
+                    Display = "0";
+                    return;
+                }
+                if(string.IsNullOrEmpty (old))
+                {
+                    Info = $"{model.Operation}({display})";
+                    Display = "0";
+                    return;
+                }
+                Info = model.Operation+ "("+Info.Replace(old, "").TrimEnd() + ")";
+                Display = "0";
+                return;
+
+            }
+            if (string.IsNullOrEmpty(old))
+            {
+                Info = display + " " + model.Operation;
+                Display = "0";
+                return;
+            }
+            if(oldIsAtomar)
+            {
+                Info = Info.Replace(old, "").Trim('(', ')')+" "+ model.Operation;
+                Display = "0";
+                return;
+            }
+            
+            Info = Info.Replace(old, "").Trim() + " " + model.Operation;
+            Display = "0";
+
         }
 
         private void backSpace()

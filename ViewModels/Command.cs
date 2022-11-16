@@ -5,12 +5,18 @@ using System.Windows.Input;
 
 namespace ViewModels
 {
+    public interface IErrorHundler
+    {
+        void ErrorHundle(Exception e);
+    }
     public class Command : ICommand
     {
+        public IErrorHundler ErrorHundler { get; set; }
         private readonly Action action;
 
-        public Command(Action action, Func<bool> canExecute = null)
+        public Command(Action action, Func<bool> canExecute = null, IErrorHundler errorHundler=null)
         {
+            ErrorHundler = errorHundler;
             this.action = action;
             this.canExecute = canExecute;
         }
@@ -35,7 +41,17 @@ namespace ViewModels
         {
             if (CanExecute(null))
             {
-                action.Invoke();
+                try
+                {
+                    action.Invoke();
+                }
+                catch(Exception e)
+                {
+                    if(ErrorHundler!=null)
+                    {
+                        ErrorHundler.ErrorHundle(e);
+                    }
+                }
             }
         }
     }

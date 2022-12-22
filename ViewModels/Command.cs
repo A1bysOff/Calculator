@@ -9,21 +9,22 @@ namespace ViewModels
     {
         void ErrorHundle(Exception e);
     }
+
     public class Command : ICommand
     {
-        public IErrorHundler ErrorHundler { get; set; }
+        public IErrorHundler? ErrorHundler { get; set; }
         private readonly Action action;
 
-        public Command(Action action, Func<bool> canExecute = null, IErrorHundler errorHundler=null)
+        public Command(Action action, Func<bool>? canExecute = null, IErrorHundler? errorHundler=null)
         {
             ErrorHundler = errorHundler;
             this.action = action;
             this.canExecute = canExecute;
         }
 
-        private readonly Func<bool> canExecute;
+        private readonly Func<bool>? canExecute;
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
         public void RaiseCanExecuteChanged()
         {
@@ -32,10 +33,7 @@ namespace ViewModels
 
 
 
-        public bool CanExecute(object _)
-        {
-            return canExecute == null ? true : canExecute();
-        }
+        public bool CanExecute(object? _) => canExecute == null || canExecute();
 
         public void Execute(object _)
         {
@@ -53,21 +51,21 @@ namespace ViewModels
                     }
                 }
             }
-        }
+        }      
     }
     public class Command <T>: ICommand
     {
         private readonly Action<T> action;
 
-        public Command(Action<T> action, Func<T,bool> canExecute = null)
+        public Command(Action<T> action, Func<T,bool>? canExecute = null)
         {
             this.action = action;
             this.canExecute = canExecute;
         }
 
-        private readonly Func<T,bool> canExecute;
+        private readonly Func<T,bool>? canExecute;
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
         public void RaiseCanExecuteChanged()
         {
@@ -76,10 +74,7 @@ namespace ViewModels
 
 
 
-        public bool CanExecute(object param)
-        {
-            return canExecute == null ? true : canExecute((T)param);
-        }
+        public bool CanExecute(object param) => canExecute == null || canExecute((T)param);
 
         public void Execute(object param)
         {
